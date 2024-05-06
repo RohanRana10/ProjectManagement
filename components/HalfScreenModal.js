@@ -1,14 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { View, Modal, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
+import { View, Modal, StyleSheet, TouchableOpacity, Text, Image, Pressable, Platform, Keyboard } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Dropdown } from 'react-native-element-dropdown';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 
 const HalfScreenModal = ({ isVisible, onClose }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [status, setStatus] = useState('');
     const [errors, setErrors] = useState({});
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+    const [endDate, setEndDate] = useState();
+    const [end, setEnd] = useState(new Date());
 
     const data = [
         { label: 'Pending', value: 'pending' },
@@ -16,11 +21,61 @@ const HalfScreenModal = ({ isVisible, onClose }) => {
 
     ];
 
+    const toggleEndDatePicker = () => {
+        // console.log('toggle called');
+        setShowEndDatePicker(!showEndDatePicker);
+    }
+
+    const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0'); // Get day and pad with leading zero if necessary
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month (January is 0) and pad with leading zero if necessary
+        const year = date.getFullYear(); // Get full year
+
+        return `${day}-${month}-${year}`;
+    }
+
+    const onEndDateChange = ({ type }, selectedDate) => {
+        // console.log('end date change called')
+        if (type == 'set') {
+            const currentDate = selectedDate;
+            setEnd(currentDate);
+            console.log(currentDate);
+            if (Platform.OS == 'android') {
+                toggleEndDatePicker();
+                setEndDate(formatDate(currentDate));
+            }
+        }
+        else {
+            toggleEndDatePicker();
+        }
+    }
+
+    const validateForm = () => {
+        let errors = {};
+        if (!title) {
+            errors.title = "Username is required!";
+        }
+        if (!description) {
+            errors.description = "Description is required!";
+        }
+        if (!endDate) {
+            errors.endDate = "End Date is required!";
+        }
+        if (!status) {
+            errors.status = "Status is required!";
+        }
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
+
     const handleSubmit = () => {
+        if (validateForm()) {
+            Keyboard.dismiss();
+            onClose();
+        }
         console.log("sub task title:", title);
         console.log("sub task description", description);
         console.log("sub task status", status);
-        onClose();
     }
 
     const renderItem = item => {
@@ -46,11 +101,11 @@ const HalfScreenModal = ({ isVisible, onClose }) => {
                 // onPress={onClose}
                 >
                     <View style={styles.modal}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text style={styles.modalHeading}>New Sub-Task</Text>
-                            <TouchableOpacity onPress={onClose}>
-                                <Text style={{ fontSize: 15, fontWeight: '300' }}>Cancel</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TouchableOpacity style={{ marginRight: 8 }} onPress={onClose}>
+                                <AntDesign name="back" size={26} color="#6237a0" />
                             </TouchableOpacity>
+                            <Text style={styles.modalHeading}>New Sub-Task</Text>
                         </View>
                         <TextInput
                             label="Title"
@@ -63,6 +118,8 @@ const HalfScreenModal = ({ isVisible, onClose }) => {
                             style={{ backgroundColor: 'white', marginTop: 12 }}
                             onChangeText={text => setTitle(text)}
                         />
+                        {errors.title && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Title is required!</Text></View>}
+
                         <TextInput
                             label="Description"
                             multiline
@@ -76,8 +133,39 @@ const HalfScreenModal = ({ isVisible, onClose }) => {
                             style={{ backgroundColor: 'white', marginTop: 10 }}
                             onChangeText={text => setDescription(text)}
                         />
+                        {errors.description && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Description is required!</Text></View>}
+
+                        {showEndDatePicker &&
+                            <DateTimePicker
+                                mode='date'
+                                display='spinner'
+                                value={end}
+                                onChange={onEndDateChange}
+                                minimumDate={new Date()}
+                            />
+                        }
+
+                        {!showEndDatePicker && <View>
+                            <Pressable onPress={toggleEndDatePicker}>
+                                <TextInput
+                                    label="Deadline"
+                                    value={endDate}
+                                    mode={'outlined'}
+                                    maxLength={12}
+                                    outlineStyle={{
+                                        borderRadius: 12,
+                                        borderColor: errors.endDate ? 'red' : '#6237A0'
+                                    }}
+                                    style={{ backgroundColor: 'white', marginTop: 10 }}
+                                    onChangeText={setEndDate}
+                                    editable={false}
+                                />
+                            </Pressable>
+                            {errors.endDate && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>End Date is required!</Text></View>}
+                        </View>
+                        }
                         <Dropdown
-                            style={{ ...styles.dropdown, borderColor: '#6237a0', borderWidth: 1 }}
+                            style={{ ...styles.dropdown, borderColor: errors.status ? 'red' : '#6237a0', borderWidth: 1 }}
                             placeholderStyle={styles.placeholderStyle}
                             selectedTextStyle={styles.selectedTextStyle}
                             inputSearchStyle={styles.inputSearchStyle}
@@ -93,6 +181,8 @@ const HalfScreenModal = ({ isVisible, onClose }) => {
                             }}
                             renderItem={renderItem}
                         />
+                        {errors.status && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Status is required!</Text></View>}
+
                         <View style={{ marginTop: 15 }}>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Text style={{ fontSize: 17 }}>Task assigned to: <Text style={{ color: 'gray', fontWeight: '300' }}>{"2"} People</Text></Text>

@@ -17,6 +17,8 @@ import Task from './screens/Task';
 import AddSubTask from './screens/AddSubTask';
 import PendingTasks from './screens/PendingTasks';
 import TeamList from './screens/TeamList';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { MenuProvider } from 'react-native-popup-menu';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,32 +63,36 @@ const MainTabs = () => {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <PaperProvider>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName='Splash'>
-            <Stack.Screen name='Splash' component={Splash} options={{
-              headerShown: false
-            }} />
-            <Stack.Screen name='SignIn' component={SignIn} options={{
-              headerShown: false
-            }} />
-            {/* <Stack.Screen name='Home' component={Home} options={{
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <MenuProvider>
+        <SafeAreaProvider>
+          <PaperProvider>
+            <NavigationContainer>
+              <Stack.Navigator initialRouteName='Splash'>
+                <Stack.Screen name='Splash' component={Splash} options={{
+                  headerShown: false
+                }} />
+                <Stack.Screen name='SignIn' component={SignIn} options={{
+                  headerShown: false
+                }} />
+                {/* <Stack.Screen name='Home' component={Home} options={{
               headerShown: false
             }} /> */}
-            {/* <Stack.Screen name='Profile' component={Profile} options={{
+                {/* <Stack.Screen name='Profile' component={Profile} options={{
               headerShown: false
             }} /> */}
-            <Stack.Screen name='MainTabs' component={MainTabs} options={{ headerShown: false }} />
-            <Stack.Screen name='Project' component={Project} options={{ headerShown: false }} />
-            <Stack.Screen name='AddTask' component={AddTask} options={{ headerShown: false }} />
-            <Stack.Screen name='Task' component={Task} options={{ headerShown: false }} />
-            <Stack.Screen name='AddSubTask' component={AddSubTask} options={{ headerShown: true }} />
-            <Stack.Screen name='TeamList' component={TeamList} options={{ headerShown: false }} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </PaperProvider>
-    </SafeAreaProvider>
+                <Stack.Screen name='MainTabs' component={MainTabs} options={{ headerShown: false }} />
+                <Stack.Screen name='Project' component={Project} options={{ headerShown: false }} />
+                <Stack.Screen name='AddTask' component={AddTask} options={{ headerShown: false }} />
+                <Stack.Screen name='Task' component={Task} options={{ headerShown: false }} />
+                <Stack.Screen name='AddSubTask' component={AddSubTask} options={{ headerShown: true }} />
+                <Stack.Screen name='TeamList' component={TeamList} options={{ headerShown: false }} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </PaperProvider>
+        </SafeAreaProvider>
+      </MenuProvider>
+    </GestureHandlerRootView>
   );
 }
 

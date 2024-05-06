@@ -1,12 +1,19 @@
-import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform } from 'react-native'
+import { FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform, Keyboard } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
-import { MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { TextInput } from 'react-native-paper';
+import {
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Divider } from '../components/Divider';
 
 export default function Project({ route }) {
 
@@ -19,6 +26,21 @@ export default function Project({ route }) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        let errors = {};
+        if (!title) {
+            errors.title = "Username is required!";
+        }
+        if (!description) {
+            errors.description = "Description is required!";
+        }
+        if (!endDate) {
+            errors.endDate = "End Date is required!";
+        }
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    }
 
     const loadTaskInfo = (task) => {
         navigation.navigate('Task', { task: task });
@@ -84,6 +106,10 @@ export default function Project({ route }) {
     }
 
     const handleSubmit = () => {
+        if (validateForm()) {
+            Keyboard.dismiss();
+            setIsAddTaskModalVisible(false);
+        }
         console.log('Title:', title)
         console.log('Desc:', description);
         console.log('Deadline:', end);
@@ -92,13 +118,48 @@ export default function Project({ route }) {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar style='auto' />
-            <TouchableOpacity style={{ alignSelf: 'flex-end' }} onPress={() => navigation.goBack()}>
-                <Text style={{ fontSize: 15, fontWeight: '300' }}>Back</Text>
-            </TouchableOpacity>
+            <View style={{ alignSelf: 'flex-end' }}>
+                <Menu>
+                    <MenuTrigger customStyles={{
+                        triggerWrapper: {
+                        }
+                    }}>
+                        <AntDesign name="setting" size={24} color="black" />
+                    </MenuTrigger>
+                    <MenuOptions customStyles={{
+                        optionsContainer: {
+                            borderRadius: 10,
+                            marginTop: 30,
+                        }
+                    }}>
+                        <MenuOption onSelect={() => alert(`Edit`)}>
+                            <View style={{ paddingHorizontal: 15, justifyContent: 'space-between', flexDirection: 'row', paddingVertical: 5, alignItems: 'center' }}>
+                                <Text style={{}}>Edit Project</Text>
+                                <Feather name="edit-3" size={24} color="#3d7bed" />
 
-            <Text style={styles.heading}>Project Title <Text>{projectId ? projectId : 0}</Text></Text>
+                            </View>
+                        </MenuOption>
+                        <Divider />
+                        <MenuOption onSelect={() => alert(`Delete`)} >
+                            <View style={{ paddingHorizontal: 15, justifyContent: 'space-between', flexDirection: 'row', paddingVertical: 5, alignItems: 'center' }}>
+                                <Text style={{}}>Delete Project</Text>
+                                <AntDesign name="delete" size={24} color="red" />
 
-            <View style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            </View>
+                        </MenuOption>
+                    </MenuOptions>
+                </Menu>
+            </View>
+
+
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity style={{ marginRight: 8 }} onPress={() => navigation.goBack()}>
+                    {/* <Ionicons name="arrow-back-circle" size={26} color="#6237a0" /> */}
+                    <AntDesign name="back" size={26} color="#6237a0" />
+                </TouchableOpacity><Text style={styles.heading}>Project Title dfh sdhf sdjh sdh <Text>{projectId ? projectId : 0}</Text></Text>
+            </View>
+
+            <View style={{ marginTop: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Progress.Circle size={120} progress={0.6}
                     color='#07da63'
                     unfilledColor='#ddd'
@@ -133,13 +194,13 @@ export default function Project({ route }) {
                 </View>
             </View>
 
-            <View style={{ marginTop: 18 }}>
+            <View style={{ marginTop: 12 }}>
                 <Text style={{ fontSize: 20, color: '#28104e', fontWeight: 900 }}>Description</Text>
                 <Text style={{ marginTop: 8, color: '#6237a0', lineHeight: 17, fontWeight: 300, }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
                 </Text>
             </View>
 
-            <View style={{ marginTop: 18, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={{ fontWeight: 900, fontSize: 25 }}>Tasks</Text>
                 <TouchableOpacity onPress={() => setIsAddTaskModalVisible(true)}>
                     <Image source={require('../assets/Images/plus.png')} style={{
@@ -152,7 +213,7 @@ export default function Project({ route }) {
                 </TouchableOpacity>
             </View>
             <Text style={{ marginTop: 2, fontSize: 13, color: 'gray', fontWeight: 300 }}>Select a task to view its associated sub-tasks</Text>
-            <View style={{ height: '47%', paddingTop: 5 }}>
+            <View style={{ height: '39%', paddingTop: 10 }}>
                 <FlatList
                     data={sampleTasks}
                     style={{ flexGrow: 1 }}
@@ -183,12 +244,18 @@ export default function Project({ route }) {
                 // onPress={onClose}
                 >
                     <View style={styles.modal}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <TouchableOpacity style={{ marginRight: 8 }} onPress={() => setIsAddTaskModalVisible(false)}>
+                                <AntDesign name="back" size={26} color="#6237a0" />
+                            </TouchableOpacity>
                             <Text style={styles.modalHeading}>New Task</Text>
+                        </View>
+                        {/* <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            
                             <TouchableOpacity onPress={() => setIsAddTaskModalVisible(false)}>
                                 <Text style={{ fontSize: 15, fontWeight: '300' }}>Cancel</Text>
                             </TouchableOpacity>
-                        </View>
+                        </View> */}
                         <TextInput
                             label="Title"
                             value={title}
@@ -200,6 +267,8 @@ export default function Project({ route }) {
                             style={{ backgroundColor: 'white', marginTop: 12 }}
                             onChangeText={text => setTitle(text)}
                         />
+                        {errors.title && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Title is required!</Text></View>}
+
                         <TextInput
                             label="Description"
                             multiline
@@ -213,6 +282,7 @@ export default function Project({ route }) {
                             style={{ backgroundColor: 'white', marginTop: 10 }}
                             onChangeText={text => setDescription(text)}
                         />
+                        {errors.description && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Description is required!</Text></View>}
 
                         {showEndDatePicker &&
                             <DateTimePicker
@@ -224,7 +294,7 @@ export default function Project({ route }) {
                             />
                         }
 
-                        {!showEndDatePicker &&
+                        {!showEndDatePicker && <View>
                             <Pressable onPress={toggleEndDatePicker}>
                                 <TextInput
                                     label="Deadline"
@@ -233,15 +303,17 @@ export default function Project({ route }) {
                                     maxLength={12}
                                     outlineStyle={{
                                         borderRadius: 12,
-                                        borderColor: errors.tag ? 'red' : '#6237A0'
+                                        borderColor: errors.endDate ? 'red' : '#6237A0'
                                     }}
                                     style={{ backgroundColor: 'white', marginTop: 10 }}
                                     onChangeText={setEndDate}
                                     editable={false}
                                 />
                             </Pressable>
+                            {errors.endDate && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>End Date is required!</Text></View>}
+                        </View>
                         }
-                        
+
                         <TouchableOpacity style={styles.modalButton} onPress={handleSubmit}>
                             <Text style={{ fontWeight: 'bold', color: 'white' }}>CREATE</Text>
                         </TouchableOpacity>
@@ -252,6 +324,7 @@ export default function Project({ route }) {
         </SafeAreaView>
     )
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -264,6 +337,7 @@ const styles = StyleSheet.create({
         color: '#6237A0',
         fontSize: 24,
         fontWeight: 'bold',
+        width: '80%'
 
     },
     modalContainer: {

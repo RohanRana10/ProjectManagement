@@ -1,4 +1,4 @@
-import { ActivityIndicator, Button, FlatList, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Button, FlatList, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
@@ -173,20 +173,29 @@ export default function AddProject() {
 
     const validateForm = () => {
         let errors = {};
-        if (!username) {
-            errors.username = "Username is required!";
+        if (!title) {
+            errors.title = "Username is required!";
         }
-        if (!password) {
-            errors.password = "Password is required!";
+        if (!description) {
+            errors.description = "Description is required!";
+        }
+        if (!tag) {
+            errors.tag = "Tag is required!";
+        }
+        if (!startDate) {
+            errors.startDate = "Start Date is required!";
+        }
+        if (!endDate) {
+            errors.endDate = "End Date is required!";
         }
         setErrors(errors);
         return Object.keys(errors).length === 0;
     }
 
     const handleSubmit = () => {
-        // if (validateForm()) {
-        //     Keyboard.dismiss();
-        // }
+        if (validateForm()) {
+            Keyboard.dismiss();
+        }
         console.log("title", title);
         console.log("desc", description);
         console.log("tag", tag);
@@ -214,6 +223,7 @@ export default function AddProject() {
                         style={{ backgroundColor: 'white', marginTop: 12 }}
                         onChangeText={text => setTitle(text)}
                     />
+                    {errors.title && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Title is required!</Text></View>}
                     <TextInput
                         label="Description"
                         multiline
@@ -227,6 +237,7 @@ export default function AddProject() {
                         style={{ backgroundColor: 'white', marginTop: 10 }}
                         onChangeText={text => setDescription(text)}
                     />
+                    {errors.description && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Description is required!</Text></View>}
                     {/* <TextInput
                     label="Tag"
                     value={tag}
@@ -241,7 +252,7 @@ export default function AddProject() {
                 /> */}
 
                     <Dropdown
-                        style={{ ...styles.dropdown, borderColor: '#6237a0', borderWidth: 1 }}
+                        style={{ ...styles.dropdown, borderColor: errors.tag ? 'red' : '#6237a0', borderWidth: 1 }}
                         placeholderStyle={styles.placeholderStyle}
                         selectedTextStyle={styles.selectedTextStyle}
                         inputSearchStyle={styles.inputSearchStyle}
@@ -257,6 +268,7 @@ export default function AddProject() {
                         }}
                         renderItem={renderItem}
                     />
+                    {errors.tag && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Tag is required!</Text></View>}
 
                     {showStartDatePicker &&
                         <DateTimePicker
@@ -268,21 +280,24 @@ export default function AddProject() {
                     }
 
                     {!showStartDatePicker &&
-                        <Pressable onPress={toggleStartDatePicker}>
-                            <TextInput
-                                label="Start Date"
-                                value={startDate}
-                                mode={'outlined'}
-                                maxLength={12}
-                                outlineStyle={{
-                                    borderRadius: 12,
-                                    borderColor: errors.tag ? 'red' : '#6237A0'
-                                }}
-                                style={{ backgroundColor: 'white', marginTop: 10 }}
-                                onChangeText={setStartDate}
-                                editable={false}
-                            />
-                        </Pressable>
+                        <View>
+                            <Pressable onPress={toggleStartDatePicker}>
+                                <TextInput
+                                    label="Start Date"
+                                    value={startDate}
+                                    mode={'outlined'}
+                                    maxLength={12}
+                                    outlineStyle={{
+                                        borderRadius: 12,
+                                        borderColor: errors.startDate ? 'red' : '#6237A0'
+                                    }}
+                                    style={{ backgroundColor: 'white', marginTop: 10 }}
+                                    onChangeText={setStartDate}
+                                    editable={false}
+                                />
+                            </Pressable>
+                            {errors.startDate && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>Start Date is required!</Text></View>}
+                        </View>
                     }
 
                     {showEndDatePicker &&
@@ -296,21 +311,24 @@ export default function AddProject() {
                     }
 
                     {!showEndDatePicker &&
-                        <Pressable onPress={toggleEndDatePicker}>
-                            <TextInput
-                                label="End Date"
-                                value={endDate}
-                                mode={'outlined'}
-                                maxLength={12}
-                                outlineStyle={{
-                                    borderRadius: 12,
-                                    borderColor: errors.tag ? 'red' : '#6237A0'
-                                }}
-                                style={{ backgroundColor: 'white', marginTop: 10 }}
-                                onChangeText={setEndDate}
-                                editable={false}
-                            />
-                        </Pressable>
+                        <View>
+                            <Pressable onPress={toggleEndDatePicker}>
+                                <TextInput
+                                    label="End Date"
+                                    value={endDate}
+                                    mode={'outlined'}
+                                    maxLength={12}
+                                    outlineStyle={{
+                                        borderRadius: 12,
+                                        borderColor: errors.endDate ? 'red' : '#6237A0'
+                                    }}
+                                    style={{ backgroundColor: 'white', marginTop: 10 }}
+                                    onChangeText={setEndDate}
+                                    editable={false}
+                                />
+                            </Pressable>
+                            {errors.endDate && <View style={{ flexDirection: 'row', alignItems: 'center' }}><Ionicons name="warning" size={24} color="red" /><Text style={{ color: 'black', marginLeft: 5 }}>End Date is required!</Text></View>}
+                        </View>
                     }
 
                     <Modal visible={isSearchModalVisible} animationType='slide' presentationStyle='pageSheet' onRequestClose={() => setIsSearchModalVisible(false)}>
